@@ -103,7 +103,7 @@ impl<T: Function> StaticDetour<T> {
   /// ```
   pub unsafe fn initialize<D>(&self, target: T, closure: D) -> Result<&Self>
   where
-    D: Fn<T::Arguments, Output = T::Output> + Send + 'static,
+    D: Fn<T::Arguments, Output = T::Output> + Send + 'static, <T as Function>::Arguments: std::marker::Tuple,
   {
     let mut detour = Box::new(GenericDetour::new(target, self.ffi)?);
     if self
@@ -154,7 +154,7 @@ impl<T: Function> StaticDetour<T> {
   /// Changes the detour, regardless of whether the hook is enabled or not.
   pub fn set_detour<C>(&self, closure: C)
   where
-    C: Fn<T::Arguments, Output = T::Output> + Send + 'static,
+    C: Fn<T::Arguments, Output = T::Output> + Send + 'static, <T as Function>::Arguments: std::marker::Tuple,
   {
     let previous = self
       .closure
@@ -175,7 +175,7 @@ impl<T: Function> StaticDetour<T> {
 
   /// Returns a transient reference to the active detour.
   #[doc(hidden)]
-  pub fn __detour(&self) -> &dyn Fn<T::Arguments, Output = T::Output> {
+  pub fn __detour(&self) -> &dyn Fn<T::Arguments, Output = T::Output> where <T as Function>::Arguments: std::marker::Tuple {
     // TODO: This is not 100% thread-safe in case the thread is stopped
     unsafe { self.closure.load(Ordering::SeqCst).as_ref() }
       .ok_or(Error::NotInitialized)
